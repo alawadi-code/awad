@@ -1,112 +1,92 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 
 class Program
 {
     static void Main()
     {
-        // task one init th arr
-        int size = 10000;
-        int[] originalArray = new int[size];
+        int size = 100000; 
+        string[] originalArray = new string[size];
 
-        
         Stopwatch stopwatch = Stopwatch.StartNew();
-        // u can use a FillArrayWithRandomData 4a 0 ms 
-        ManualRandom(originalArray);
+        FillArrayWithRandomStrings(originalArray);
         stopwatch.Stop();
-        Console.WriteLine($"Time random {stopwatch.ElapsedMilliseconds} ms");
+        Console.WriteLine($"Time to generate random strings: {stopwatch.ElapsedMilliseconds} ms");
 
-        int[] arrayForBubbleSort = (int[])originalArray.Clone();
-        int[] arrayForMergeSort = (int[])originalArray.Clone();
+        string[] arrayForBubbleSort = (string[])originalArray.Clone();
+        string[] arrayForMergeSort = (string[])originalArray.Clone();
 
         stopwatch.Restart();
         BubbleSort(arrayForBubbleSort);
         stopwatch.Stop();
-        Console.WriteLine($"Time ^ {stopwatch.ElapsedMilliseconds} ms");
+        Console.WriteLine($"Bubble Sort time: {stopwatch.ElapsedMilliseconds} ms");
 
         stopwatch.Restart();
         MergeSort(arrayForMergeSort, 0, arrayForMergeSort.Length - 1);
         stopwatch.Stop();
-        Console.WriteLine($"Time log {stopwatch.ElapsedMilliseconds} ms");
+        Console.WriteLine($"Merge Sort time: {stopwatch.ElapsedMilliseconds} ms");
 
         Console.ReadLine();
     }
-    //
-    //
-    // Task 2Fill array
-    // i do 2 method
-    static void FillArrayWithRandomData(int[] arr)
+
+    static void FillArrayWithRandomStrings(string[] arr)
     {
         Random rand = new Random();
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         for (int i = 0; i < arr.Length; i++)
         {
-            arr[i] = rand.Next(0, 1000000);
-        }
-    }
-    static void ManualRandom(int[] arr)
-    {
-        long seed = DateTime.Now.Ticks;
-        for (int i = 0; i < arr.Length; i++)
-        {
-            seed = (seed * 6364136223846793005L + 1) % long.MaxValue;
-            arr[i] = (int)(seed % 100000); // Keep values in a reasonable range
+            int length = rand.Next(5, 15); // string length from 5 to 15
+            arr[i] = new string(Enumerable.Repeat(chars, length)
+                                .Select(s => s[rand.Next(s.Length)]).ToArray());
         }
     }
 
-    //
-    //
-    //
-    //
-    // Task 4 S(n^2)
-    static void BubbleSort(int[] arr)
+    static void BubbleSort(string[] arr)
     {
         int n = arr.Length;
         for (int i = 0; i < n - 1; i++)
         {
             for (int j = 0; j < n - i - 1; j++)
             {
-                if (arr[j] > arr[j + 1])
+                if (string.Compare(arr[j], arr[j + 1]) > 0)
                 {
-                    int temp = arr[j];
+                    string temp = arr[j];
                     arr[j] = arr[j + 1];
                     arr[j + 1] = temp;
                 }
             }
         }
     }
-    //
-    //
-    //
-    //
-    //
-    //
-    // Task 5 S(n log n)
-    static void MergeSort(int[] arr, int left, int right)
+
+    static void MergeSort(string[] arr, int left, int right)
     {
         if (left < right)
         {
             int mid = (left + right) / 2;
-
             MergeSort(arr, left, mid);
             MergeSort(arr, mid + 1, right);
             Merge(arr, left, mid, right);
         }
     }
-    static void Merge(int[] arr, int left, int mid, int right)
+
+    static void Merge(string[] arr, int left, int mid, int right)
     {
         int n1 = mid - left + 1;
         int n2 = right - mid;
 
-        int[] L = new int[n1];
-        int[] R = new int[n2];
+        string[] L = new string[n1];
+        string[] R = new string[n2];
 
         Array.Copy(arr, left, L, 0, n1);
         Array.Copy(arr, mid + 1, R, 0, n2);
 
+        
         int i = 0, j = 0, k = left;
 
         while (i < n1 && j < n2)
         {
-            if (L[i] <= R[j])
+            if (string.Compare(L[i], R[j]) <= 0)
                 arr[k++] = L[i++];
             else
                 arr[k++] = R[j++];
